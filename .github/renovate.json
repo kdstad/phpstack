@@ -1,0 +1,1 @@
+{"$schema":"https://docs.renovatebot.com/renovate-schema.json","extends":["config:recommended"],"pinDigests":true,"labels":["renovate"],"packageRules":[{"matchDatasources":["docker"],"matchUpdateTypes":["digest"],"automerge":true,"automergeType":"pr","platformAutomerge":true},{"matchDatasources":["docker"],"matchUpdateTypes":["major","minor","patch"],"automerge":false}]}
