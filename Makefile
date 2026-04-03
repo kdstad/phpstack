@@ -8,3 +8,12 @@ httpd-test:
 .PHONY: httpd-shell
 httpd-shell:
 	cd httpd && $(DOCKER) run --rm -it phpstack-httpd:latest /bin/sh
+
+.PHONY: php-fpm-test
+php-fpm-test:
+	cd 8.5-fpm && $(DOCKER) build -t phpstack-8.5-fpm:latest -f Dockerfile .
+	$(DOCKER) run --rm -p 9000:9000 phpstack-8.5-fpm:latest
+
+.PHONY: php-fpm-shell
+php-fpm-shell:
+	cd 8.5-fpm && $(DOCKER) run --rm -it phpstack-8.5-fpm:latest /bin/sh
