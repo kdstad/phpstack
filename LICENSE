@@ -1,0 +1,5 @@
+The Dockerfiles and supporting scripts in this repository are distributed under their respective licenses.
+Please refer to the individual LICENSE files in each folder for full licensing terms.
+
+- PHP images (8.1-fpm, 8.5-fpm) follow the **MIT License**. See `8.1-fpm/LICENSE` and `8.5-fpm/LICENSE` for details.
+- HTTPD image follows the **Apache License 2.0**. See `httpd/LICENSE` for details.
