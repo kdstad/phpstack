@@ -21,7 +21,7 @@ RUN set -eux; \
 		-e 's!^(\s*Group)\s+www-data\s*$!\1 phpstack!g' \
 		-e 's/#LoadModule proxy_module/LoadModule proxy_module/' \
         -e 's/#LoadModule proxy_fcgi_module/LoadModule proxy_fcgi_module/' \
-		-e 's/#LoadModule rewrite_module modules/mod_rewrite.so/LoadModule rewrite_module modules\/mod_rewrite.so/' \
+		-e 's/#LoadModule rewrite_module/LoadModule rewrite_module/' \
         -e 's|DocumentRoot "/usr/local/apache2/htdocs"|DocumentRoot "/home/phpstack/public_html"|' \
 		-e 's|DirectoryIndex index.html|DirectoryIndex index.html index.php |' \
         -e 's|<Directory "/usr/local/apache2/htdocs">|<Directory "/home/phpstack/public_html">|' \
