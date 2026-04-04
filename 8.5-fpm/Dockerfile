@@ -19,8 +19,8 @@ RUN set -eux; \
 		-e '/^pm\.min_spare_servers\s*=/d' \
 		-e '/^pm\.max_spare_servers\s*=/d' \
 		-e '/^\[www\]/a pm.process_idle_timeout = 10s\npm.max_requests = 200\nrequest_terminate_timeout = 600' \
-		/usr/local/etc/php-fpm.d/www.conf
-		/usr/local/etc/php-fpm.d/docker.conf
+		/usr/local/etc/php-fpm.d/www.conf \
+		/usr/local/etc/php-fpm.d/docker.conf \
 	; \
 	grep 'user = appuser' /usr/local/etc/php-fpm.d/www.conf; \
 	grep 'pm = ondemand' /usr/local/etc/php-fpm.d/www.conf && \
