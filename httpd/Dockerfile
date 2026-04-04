@@ -9,8 +9,8 @@ RUN set -x && \
 	apk upgrade --no-cache && \
 	addgroup -g 1082 -S appuser && adduser -u 1082 -h /var/www -H -D -S -G appuser appuser
 
-COPY zz-phpstack.conf "$HTTPD_PREFIX/conf/extra/zz-phpstack.conf"
-COPY zz-securityheaders.conf "$HTTPD_PREFIX/conf/extra/zz-securityheaders.conf"
+COPY conf.d/zz-phpstack.conf "$HTTPD_PREFIX/conf/extra/zz-phpstack.conf"
+COPY conf.d/zz-securityheaders.conf "$HTTPD_PREFIX/conf/extra/zz-securityheaders.conf"
 
 # Ref. https://github.com/docker-library/httpd/blob/master/2.4/alpine/Dockerfile
 RUN set -eux; \
