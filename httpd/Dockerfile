@@ -4,7 +4,7 @@ FROM httpd:2.4-alpine3.23@sha256:8f26f33a7002658050e9ab2cd6b77502619dfc89d0a6ba2
 ENV PHP_FPM_HOST=php
 ENV PHP_FPM_PORT=9000
 
-# upgrade the image and create a system user for the httpd process
+# upgrade the image and create a system user (appuser) for the httpd process
 RUN set -x && \
 	apk upgrade --no-cache && \
 	addgroup -g 1082 -S appuser && adduser -u 1082 -h /var/www -H -D -S -G appuser appuser
