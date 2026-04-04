@@ -4,22 +4,25 @@ FROM php:8.1-fpm-alpine3.21@sha256:a84e0422af72d9a60a8f73756b622bcd37c5a8f85609e
 # upgrade the image and create a system user for the php-fpm process
 RUN set -x && \
 	apk upgrade --no-cache && \
-	addgroup -g 1082 -S phpstack && adduser -u 1082 -D -S -G phpstack phpstack
+	addgroup -g 1082 -S appuser && adduser -u 1082 -h /var/www -H -D -S -G appuser appuser
 
 # configure php-fpm pool
-# Ref. https://github.com/docker-library/php/blob/6485b53a1da0f2c4c5b564808de75ae62c023286/8.1/alpine3.21/fpm/Dockerfile
+# Ref. https://github.com/docker-library/php/blob/master/8.5/alpine3.23/fpm/Dockerfile
 RUN set -eux; \
 	sed -ri \
-		-e 's!^(user)\s*=\s*www-data\s*$!\1 = phpstack!g' \
-		-e 's!^(group)\s*=\s*www-data\s*$!\1 = phpstack!g' \
+		-e 's!^(user)\s*=\s*www-data\s*$!\1 = appuser!g' \
+		-e 's!^(group)\s*=\s*www-data\s*$!\1 = appuser!g' \
 		-e 's!^(pm)\s*=\s*dynamic\s*$!\1 = ondemand!g' \
 		-e 's!^(pm\.max_children)\s*=.*$!\1 = 80!g' \
+		-e '/^access\.log\s*=/d' \
 		-e '/^pm\.start_servers\s*=/d' \
 		-e '/^pm\.min_spare_servers\s*=/d' \
 		-e '/^pm\.max_spare_servers\s*=/d' \
 		-e '/^\[www\]/a pm.process_idle_timeout = 10s\npm.max_requests = 200\nrequest_terminate_timeout = 600' \
-		/usr/local/etc/php-fpm.d/www.conf; \
-	grep 'user = phpstack' /usr/local/etc/php-fpm.d/www.conf; \
+		/usr/local/etc/php-fpm.d/www.conf
+		/usr/local/etc/php-fpm.d/docker.conf
+	; \
+	grep 'user = appuser' /usr/local/etc/php-fpm.d/www.conf; \
 	grep 'pm = ondemand' /usr/local/etc/php-fpm.d/www.conf && \
 	{ \
 		echo 'max_execution_time = 300'; \

@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write  # needed to upload SARIF to GitHub Security
     strategy:
       fail-fast: false
       matrix:
@@ -55,9 +56,18 @@ jobs:
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
           image-ref: ${{ matrix.tag }}
-          exit-code: '1'
-          severity: CRITICAL
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
           scanners: vuln,misconfig
+          trivyignores: .trivyignore.yaml
         env:
           TRIVY_USERNAME: ${{ github.actor }}
           TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Trivy results to GitHub Security
+        if: steps.changes.outputs.changed == 'true'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-${{ matrix.context }}
