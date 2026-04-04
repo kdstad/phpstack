@@ -7,11 +7,9 @@ ENV PHP_FPM_PORT=9000
 # upgrade the image and create a system user for the httpd process
 RUN set -x && \
 	apk upgrade --no-cache && \
-	addgroup -g 1082 -S phpstack && adduser -u 1082 -D -S -G phpstack phpstack && \
-	mkdir -p /home/phpstack/public_html
+	addgroup -g 1082 -S phpstack && adduser -u 1082 -D -S -G phpstack phpstack
 
-COPY index.html /home/phpstack/public_html/index.html
-COPY phpstack.conf /usr/local/apache2/conf/extra/phpstack.conf
+COPY phpstack.conf "$HTTPD_PREFIX/conf/extra/phpstack.conf"
 
 # Ref. https://github.com/docker-library/httpd/blob/master/2.4/alpine/Dockerfile
 RUN set -eux; \
@@ -22,9 +20,10 @@ RUN set -eux; \
 		-e 's/#LoadModule proxy_module/LoadModule proxy_module/' \
         -e 's/#LoadModule proxy_fcgi_module/LoadModule proxy_fcgi_module/' \
 		-e 's/#LoadModule rewrite_module/LoadModule rewrite_module/' \
-        -e 's|DocumentRoot "/usr/local/apache2/htdocs"|DocumentRoot "/home/phpstack/public_html"|' \
+		-e 's/#LoadModule remoteip_module/LoadModule remoteip_module/' \
+        -e 's|DocumentRoot "/usr/local/apache2/htdocs"|DocumentRoot "/var/www/html"|' \
 		-e 's|DirectoryIndex index.html|DirectoryIndex index.html index.php |' \
-        -e 's|<Directory "/usr/local/apache2/htdocs">|<Directory "/home/phpstack/public_html">|' \
+        -e 's|<Directory "/usr/local/apache2/htdocs">|<Directory "/var/www/html">|' \
 		-e '/Options Indexes FollowSymLinks/d' \
 		-e 's|AllowOverride None|AllowOverride All|' \
 		-e '$a Include conf/extra/redirects.conf' \

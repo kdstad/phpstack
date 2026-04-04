@@ -4,9 +4,7 @@ FROM php:8.5-fpm-alpine3.23@sha256:0b842919dc0aaed33eb5d57c7002f9f2d0120972d59db
 # upgrade the image and create a system user for the php-fpm process
 RUN set -x && \
 	apk upgrade --no-cache && \
-	addgroup -g 1082 -S phpstack && adduser -u 1082 -D -S -G phpstack phpstack && \
-	mkdir -p /home/phpstack/public_html && \
-	echo "<?php phpinfo(); ?>" > /home/phpstack/public_html/index.php
+	addgroup -g 1082 -S phpstack && adduser -u 1082 -D -S -G phpstack phpstack
 
 # configure php-fpm pool
 # Ref. https://github.com/docker-library/php/blob/master/8.5/alpine3.23/fpm/Dockerfile
