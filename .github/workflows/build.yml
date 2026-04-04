@@ -49,3 +49,16 @@ jobs:
           context: ${{ matrix.context }}
           push: true
           tags: ${{ matrix.tag }}
+
+      - name: Scan image with Trivy
+        if: steps.changes.outputs.changed == 'true'
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        with:
+          image-ref: ${{ matrix.tag }}
+          exit-code: '1'
+          severity: CRITICAL
+          scanners: vuln,misconfig
+          trivyignores: .trivyignore.yaml
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}

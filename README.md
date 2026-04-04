@@ -1,5 +1,7 @@
 # phpstack
 
+***Please note:** Issues and PR's will not be accepted on this repo as it is provided as-is for our own projects, you are welcome to fork this project and make your own modifications*
+
 Minimal, reusable PHP-FPM and HTTPD container images for running modern PHP applications.
 
 This repository provides a small set of base images built for consistency, performance, and portability across container platforms (Docker, Kubernetes, and others).

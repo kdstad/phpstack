@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.2
 FROM php:8.1-fpm-alpine3.21@sha256:a84e0422af72d9a60a8f73756b622bcd37c5a8f85609e43e0a6e16c0a1a7820e
 
-# upgrade the image and create a system user for the php-fpm process 
+# upgrade the image and create a system user for the php-fpm process.
 RUN set -x && \
 	apk upgrade --no-cache && \
 	addgroup -g 1082 -S phpstack && adduser -u 1082 -D -S -G phpstack phpstack && \
