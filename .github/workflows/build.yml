@@ -16,8 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-#          - context: 8.1-fpm
-#            tag: ghcr.io/kdstad/phpstack:8.1-fpm
+          - context: 8.1-fpm
+            tag: ghcr.io/kdstad/phpstack:8.1-fpm
           - context: 8.5-fpm
             tag: ghcr.io/kdstad/phpstack:8.5-fpm
           - context: httpd
