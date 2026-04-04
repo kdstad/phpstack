@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-FROM php:8.5-fpm-alpine3.23@sha256:0b842919dc0aaed33eb5d57c7002f9f2d0120972d59db610cb6bdb69ad7624f0
+FROM php:8.1-fpm-alpine3.21@sha256:a84e0422af72d9a60a8f73756b622bcd37c5a8f85609e43e0a6e16c0a1a7820e
 
 # upgrade the image and create a system user that allows host-user to write to the document root without using root permissions.
 RUN set -x && \
@@ -9,7 +9,7 @@ RUN set -x && \
 	echo "<?php phpinfo(); ?>" > /home/phpstack/public_html/index.php
 
 # configure php-fpm pool
-# Ref. https://github.com/docker-library/php/blob/master/8.5/alpine3.23/fpm/Dockerfile
+# Ref. https://github.com/docker-library/php/blob/6485b53a1da0f2c4c5b564808de75ae62c023286/8.1/alpine3.21/fpm/Dockerfile
 RUN set -eux; \
 	sed -ri \
 		-e 's!^(user)\s*=\s*www-data\s*$!\1 = phpstack!g' \
