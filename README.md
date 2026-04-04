@@ -1,19 +1,12 @@
 # phpstack
 
-***Please note:** Issues and PR's will not be accepted on this repo as it is provided as-is for our own projects, you are welcome to fork this project and make your own modifications*
+> [!NOTE]
+> Issues and PR's will not be accepted on this repo as it is provided as-is for our own projects. You are welcome to fork this project and make your own modifications.
 
 Minimal, reusable PHP-FPM and HTTPD container images for running modern PHP applications.
 
 This repository provides a small set of base images built for consistency, performance, and portability across container platforms (Docker, Kubernetes, and others).
 While primarily used for PrestaShop, the images are intentionally generic and can be used for any PHP-based application.
-
-## Images
-
-All images are published via GitHub Container Registry:
-
-* `ghcr.io/kdstad/phpstack:8.1-fpm`
-* `ghcr.io/kdstad/phpstack:8.5-fpm`
-* `ghcr.io/kdstad/phpstack:httpd`
 
 ## License
 
