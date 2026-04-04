@@ -36,9 +36,11 @@ RUN set -eux; \
 		echo; \
 		echo 'display_errors = Off'; \
 		echo 'display_startup_errors = Off'; \
+		echo 'error_log = /proc/self/fd/2'; \
 		echo 'error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT'; \
 		echo 'log_errors = On'; \
-		echo 'error_log = /proc/self/fd/2'; \
+		echo; \
+		echo 'expose_php = Off'; \
 	} > "$PHP_INI_DIR/conf.d/zz-phpstack.ini"
 
 RUN set -eux; \
