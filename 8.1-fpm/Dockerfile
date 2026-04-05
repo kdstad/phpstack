@@ -29,6 +29,10 @@ RUN set -eux; \
 	grep 'user = appuser' /usr/local/etc/php-fpm.d/www.conf; \
 	grep 'pm = ondemand' /usr/local/etc/php-fpm.d/www.conf && \
 	{ \
+		echo "session.cookie_httponly=1"; \
+		echo "session.cookie_secure=1"; \
+		echo "session.cookie_samesite=Lax"; \
+		echo; \
 		echo "date.timezone=${TZ}"; \
 		echo; \
 		echo 'max_execution_time = 300'; \
