@@ -70,7 +70,8 @@ RUN set -eux; \
 		libzip-dev \
 		zlib-dev \
 	; \
-	docker-php-ext-configure gd --with-jpeg --with-freetype; \
+	docker-php-ext-configure gd \
+		--with-jpeg --with-freetype --with-webp --with-xpm; \
 	docker-php-ext-install -j$(nproc) \
 		bcmath \
 		gd \
