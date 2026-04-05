@@ -69,6 +69,8 @@ RUN set -eux; \
 		libpng-dev \
 		libzip-dev \
 		zlib-dev \
+		libwebp-dev \
+		libxpm-dev \
 	; \
 	docker-php-ext-configure gd \
 		--with-jpeg --with-freetype --with-webp --with-xpm; \

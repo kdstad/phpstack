@@ -58,6 +58,8 @@ RUN set -eux; \
 		libmemcached \
 		libpng \
 		libzip \
+		libwebp \
+		libxpm \
 	; \
 	apk add --no-cache --virtual .build-deps \
 		$PHPIZE_DEPS \
@@ -69,6 +71,8 @@ RUN set -eux; \
 		libpng-dev \
 		libzip-dev \
 		zlib-dev \
+		libwebp-dev \
+		libxpm-dev \
 	; \
 	docker-php-ext-configure gd \
 		--with-jpeg --with-freetype --with-webp --with-xpm; \
