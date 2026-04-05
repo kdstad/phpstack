@@ -60,6 +60,7 @@ RUN set -eux; \
 		libzip \
 		libwebp \
 		libxpm \
+		libavif \
 	; \
 	apk add --no-cache --virtual .build-deps \
 		$PHPIZE_DEPS \
@@ -73,9 +74,10 @@ RUN set -eux; \
 		zlib-dev \
 		libwebp-dev \
 		libxpm-dev \
+		libavif-dev \
 	; \
 	docker-php-ext-configure gd \
-		--with-jpeg --with-freetype --with-webp --with-xpm; \
+		--with-jpeg --with-freetype --with-webp --with-xpm --with-avif; \
 	docker-php-ext-install -j$(nproc) \
 		bcmath \
 		gd \
