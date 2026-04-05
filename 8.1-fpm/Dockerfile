@@ -1,9 +1,13 @@
 # syntax=docker/dockerfile:1.2
 FROM php:8.1-fpm-alpine3.21@sha256:a84e0422af72d9a60a8f73756b622bcd37c5a8f85609e43e0a6e16c0a1a7820e
 
+ENV TZ=Europe/Copenhagen
+
 # upgrade the image and create a system user (appuser) for the php-fpm process
 RUN set -x && \
-	apk upgrade --no-cache && \
+	apk upgrade --no-cache && apk add --no-cache tzdata && \
+	cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+		echo "${TZ}" > /etc/timezone && \
 	addgroup -g 1082 -S appuser && adduser -u 1082 -h /var/www -H -D -S -G appuser appuser
 
 # configure php-fpm pool
@@ -25,6 +29,8 @@ RUN set -eux; \
 	grep 'user = appuser' /usr/local/etc/php-fpm.d/www.conf; \
 	grep 'pm = ondemand' /usr/local/etc/php-fpm.d/www.conf && \
 	{ \
+		echo "date.timezone=${TZ}"; \
+		echo; \
 		echo 'max_execution_time = 300'; \
 		echo 'max_input_time = 600'; \
 		echo 'max_input_vars = 10000'; \
