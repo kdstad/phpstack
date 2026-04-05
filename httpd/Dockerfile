@@ -23,12 +23,12 @@ RUN set -eux; \
 		-e 's!^(\s*User)\s+www-data\s*$!\1 appuser!g' \
 		-e 's!^(\s*Group)\s+www-data\s*$!\1 appuser!g' \
 		-e 's/#LoadModule proxy_module/LoadModule proxy_module/' \
-        -e 's/#LoadModule proxy_fcgi_module/LoadModule proxy_fcgi_module/' \
+		-e 's/#LoadModule proxy_fcgi_module/LoadModule proxy_fcgi_module/' \
 		-e 's/#LoadModule rewrite_module/LoadModule rewrite_module/' \
 		-e 's/#LoadModule remoteip_module/LoadModule remoteip_module/' \
-        -e 's|DocumentRoot "/usr/local/apache2/htdocs"|DocumentRoot "/var/www/html"|' \
-		-e 's|DirectoryIndex index.html|DirectoryIndex index.html index.php |' \
-        -e 's|<Directory "/usr/local/apache2/htdocs">|<Directory "/var/www/html">|' \
+		-e 's|DocumentRoot "/usr/local/apache2/htdocs"|DocumentRoot "/var/www/html"|' \
+		-e 's|DirectoryIndex index.html|DirectoryIndex index.html index.php|' \
+		-e 's|<Directory "/usr/local/apache2/htdocs">|<Directory "/var/www/html">|' \
 		-e '/Options Indexes FollowSymLinks/d' \
 		-e 's|AllowOverride None|AllowOverride All|' \
 		-e '$a Include conf/extra/redirects.conf' \
@@ -42,3 +42,8 @@ RUN set -eux; \
 	\
 # smoke test
 	httpd -v
+
+WORKDIR /var/www/html
+
+RUN set -eux; \
+	cp -v "$HTTPD_PREFIX/htdocs/index.html" index.html
