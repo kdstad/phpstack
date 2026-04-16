@@ -1,19 +1,20 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  "schedule": "before 9am on the first day of the month",
+  "schedule": ["before 9am on the first day of the month"],
   "timezone": "UTC",
   "vulnerabilityAlerts": {
     "labels": ["security"],
-    "schedule": "at any time"
+    "schedule": ["at any time"]
   },
   "labels": ["renovate"],
   "ignoreUnstable": true,
-  "stabilityDays": 7,
-  "docker": {
-    "pinDigests": true
-  },
+  "minimumReleaseAge": "7 days",
   "packageRules": [
+    {
+      "matchCategories": ["docker"],
+      "pinDigests": true
+    },
     {
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["major", "minor"],
@@ -21,17 +22,14 @@
     },
     {
       "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["digest"],
+      "matchUpdateTypes": ["digest", "patch"],
       "automerge": true,
       "automergeType": "pr",
       "platformAutomerge": true
     },
     {
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["patch"],
-      "automerge": true,
-      "automergeType": "pr",
-      "platformAutomerge": true
+      "matchManagers": ["github-actions"],
+      "enabled": false
     }
   ]
 }
