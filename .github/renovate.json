@@ -25,7 +25,8 @@
       "matchUpdateTypes": ["digest", "patch"],
       "automerge": true,
       "automergeType": "pr",
-      "platformAutomerge": true
+      "platformAutomerge": true,
+      "dependencyDashboardApproval": false
     },
     {
       "matchManagers": ["github-actions"],
