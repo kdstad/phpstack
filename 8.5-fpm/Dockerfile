@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2@sha256:e2a8561e419ab1ba6b2fe6cbdf49fd92b95912df1cf7d313c3e2230a333fdbcc
-FROM php:8.5-fpm-alpine3.23@sha256:0b842919dc0aaed33eb5d57c7002f9f2d0120972d59db610cb6bdb69ad7624f0
+FROM php:8.5-fpm-alpine3.23@sha256:ceae24c32454d3b88dc7eeb3666f80820effb1d1571f791fe97d6332b65ba7ad
 
 ENV TZ=Europe/Copenhagen
 
