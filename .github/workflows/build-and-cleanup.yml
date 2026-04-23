@@ -1,0 +1,135 @@
+name: build and push images
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 5 1 * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.context }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - context: 8.1-fpm
+            tag: ghcr.io/kdstad/phpstack:8.1-fpm
+          - context: 8.5-fpm
+            tag: ghcr.io/kdstad/phpstack:8.5-fpm
+          - context: httpd
+            tag: ghcr.io/kdstad/phpstack:httpd
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for file changes
+        uses: dorny/paths-filter@v3
+        id: file_changes
+        if: github.event_name == 'push'
+        with:
+          filters: |
+            changed:
+              - '${{ matrix.context }}/**'
+
+      - name: Set up crane
+        if: github.event_name == 'schedule'
+        uses: imjasonh/setup-crane@v0.4
+
+      - name: Check upstream digest
+        id: digest_check
+        if: github.event_name == 'schedule'
+        run: |
+          image_ref=$(grep '^FROM ' ${{ matrix.context }}/Dockerfile | sed 's/FROM //')
+          image_tag="${image_ref%%@*}"
+          pinned="${image_ref##*@}"
+          upstream=$(crane digest "$image_tag")
+          if [[ "$upstream" != "$pinned" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            sed -i "s|${image_tag}@${pinned}|${image_tag}@${upstream}|" ${{ matrix.context }}/Dockerfile
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Log in to GHCR
+        if: >
+          github.event_name == 'workflow_dispatch' ||
+          steps.file_changes.outputs.changed == 'true' ||
+          steps.digest_check.outputs.changed == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        if: >
+          github.event_name == 'workflow_dispatch' ||
+          steps.file_changes.outputs.changed == 'true' ||
+          steps.digest_check.outputs.changed == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          tags: ${{ matrix.tag }}
+
+      - name: Scan image with Trivy
+        if: >
+          github.event_name == 'workflow_dispatch' ||
+          steps.file_changes.outputs.changed == 'true' ||
+          steps.digest_check.outputs.changed == 'true'
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        with:
+          image-ref: ${{ matrix.tag }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          scanners: vuln,misconfig
+          trivyignores: .trivyignore.yaml
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Trivy results to GitHub Security
+        if: >
+          github.event_name == 'workflow_dispatch' ||
+          steps.file_changes.outputs.changed == 'true' ||
+          steps.digest_check.outputs.changed == 'true'
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-${{ matrix.context }}
+
+      - name: Commit updated Dockerfile
+        if: steps.digest_check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ${{ matrix.context }}/Dockerfile
+          git commit -m "chore: update ${{ matrix.context }} base image digest"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break || sleep $((i * 10))
+          done
+
+  cleanup:
+    name: Remove untagged image versions
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    needs: build
+    steps:
+      - name: Delete untagged versions of phpstack
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: phpstack
+          package-type: container
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: true
