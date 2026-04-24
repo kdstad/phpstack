@@ -1,0 +1,50 @@
+name: update base image digests
+
+on:
+  schedule:
+    - cron: '0 5 1 * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    name: check and update digests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up crane
+        uses: imjasonh/setup-crane@v0.4
+
+      - name: Update pinned digests
+        id: update
+        run: |
+          set -euo pipefail
+          changed=false
+
+          while IFS= read -r dockerfile; do
+            image_ref=$(grep '^FROM ' "$dockerfile" | sed 's/FROM //')
+            image_tag="${image_ref%%@*}"
+            pinned="${image_ref##*@}"
+            upstream=$(crane digest "$image_tag")
+            if [[ "$upstream" != "$pinned" ]]; then
+              sed -i "s|${image_tag}@${pinned}|${image_tag}@${upstream}|" "$dockerfile"
+              echo "Updated ${dockerfile}: ${pinned} -> ${upstream}"
+              changed=true
+            else
+              echo "Up to date: ${dockerfile}"
+            fi
+          done < <(find . -name 'Dockerfile' -not -path './.git/*')
+
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add '*/Dockerfile'
+          git commit -m "chore: update base image digests"
+          git push
