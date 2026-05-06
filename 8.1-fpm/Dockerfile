@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.2@sha256:e2a8561e419ab1ba6b2fe6cbdf49fd92b95912df1cf7d313c3e2230a333fdbcc
+# syntax=docker/dockerfile:1.2
 FROM php:8.1-fpm-alpine3.21@sha256:a84e0422af72d9a60a8f73756b622bcd37c5a8f85609e43e0a6e16c0a1a7820e
 
 ENV TZ=Europe/Copenhagen
