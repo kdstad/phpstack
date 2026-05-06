@@ -1,0 +1,91 @@
+name: build and push images
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.context }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - context: 8.1-fpm
+            tag: ghcr.io/kdstad/phpstack:8.1-fpm
+          - context: 8.5-fpm
+            tag: ghcr.io/kdstad/phpstack:8.5-fpm
+          - context: httpd
+            tag: ghcr.io/kdstad/phpstack:httpd
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for file changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        if: github.event_name == 'push'
+        with:
+          filters: |
+            changed:
+              - '${{ matrix.context }}/**'
+
+      - name: Log in to GHCR
+        if: github.event_name == 'workflow_dispatch' || steps.changes.outputs.changed == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        if: github.event_name == 'workflow_dispatch' || steps.changes.outputs.changed == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          tags: ${{ matrix.tag }}
+
+      - name: Scan image with Trivy
+        if: github.event_name == 'workflow_dispatch' || steps.changes.outputs.changed == 'true'
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        with:
+          image-ref: ${{ matrix.tag }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          scanners: vuln,misconfig
+          trivyignores: .trivyignore.yaml
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Trivy results to GitHub Security
+        if: github.event_name == 'workflow_dispatch' || steps.changes.outputs.changed == 'true'
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-${{ matrix.context }}
+
+  cleanup:
+    name: Remove untagged image versions
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      packages: write
+    steps:
+      - name: Delete untagged versions of phpstack
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: phpstack
+          package-type: container
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: true
