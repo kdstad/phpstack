@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2@sha256:e2a8561e419ab1ba6b2fe6cbdf49fd92b95912df1cf7d313c3e2230a333fdbcc
-FROM php:8.5-fpm-alpine3.21@sha256:4fc80abd462e721895c4024aa93da50a640bb7cb50fbfe49eae9d5ec9ba4c136
+FROM php:8.1-fpm-alpine3.21@sha256:a84e0422af72d9a60a8f73756b622bcd37c5a8f85609e43e0a6e16c0a1a7820e
 
 ENV TZ=Europe/Copenhagen
 
@@ -11,7 +11,7 @@ RUN set -x && \
 	addgroup -g 1082 -S appuser && adduser -u 1082 -h /var/www -H -D -S -G appuser appuser
 
 # configure php-fpm pool
-# Ref. https://github.com/docker-library/php/blob/master/8.5/alpine3.23/fpm/Dockerfile
+# Ref. https://github.com/docker-library/php/blob/master/8.1/alpine3.21/fpm/Dockerfile
 RUN set -eux; \
 	sed -ri \
 		-e 's!^(user)\s*=\s*www-data\s*$!\1 = appuser!g' \
