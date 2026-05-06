@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: docker
     directory: /8.1-fpm
     schedule:
-      interval: monthly
+      interval: weekly
     ignore:
       - dependency-name: '*'
         update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
@@ -11,7 +11,7 @@ updates:
   - package-ecosystem: docker
     directory: /8.5-fpm
     schedule:
-      interval: monthly
+      interval: weekly
     ignore:
       - dependency-name: '*'
         update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
@@ -19,7 +19,4 @@ updates:
   - package-ecosystem: docker
     directory: /httpd
     schedule:
-      interval: monthly
-    ignore:
-      - dependency-name: '*'
-        update-types: ['version-update:semver-major', 'version-update:semver-minor', 'version-update:semver-patch']
+      interval: weekly
