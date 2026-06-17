@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-FROM httpd:2.4-alpine3.23@sha256:4a15e9c73f25334bc03cfb3c692c9adfc103bb46ca89cee1f0b9a5fcbc7b21f6
+FROM httpd:2.4-alpine3.24@sha256:4a15e9c73f25334bc03cfb3c692c9adfc103bb46ca89cee1f0b9a5fcbc7b21f6
 
 ENV PHP_FPM_HOST=php
 ENV PHP_FPM_PORT=9000
