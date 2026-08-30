@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-FROM php:8.1-fpm-alpine3.21@sha256:a84e0422af72d9a60a8f73756b622bcd37c5a8f85609e43e0a6e16c0a1a7820e
+FROM docker.io/library/php:8.1-fpm-alpine3.22@sha256:52292ce944a9f255fa089536eb48fce3b954f36b3ad783321ad1ccfeacdeabae
 
 ENV TZ=Europe/Copenhagen
 
@@ -11,7 +11,7 @@ RUN set -x && \
 	addgroup -g 1082 -S appuser && adduser -u 1082 -h /var/www -H -D -S -G appuser appuser
 
 # configure php-fpm pool
-# Ref. https://github.com/docker-library/php/blob/master/8.1/alpine3.21/fpm/Dockerfile
+# Ref. https://github.com/docker-library/php/blob/master/8.1/alpine3.22/fpm/Dockerfile
 RUN set -eux; \
 	sed -ri \
 		-e 's!^(user)\s*=\s*www-data\s*$!\1 = appuser!g' \
@@ -79,6 +79,7 @@ RUN set -eux; \
 		libwebp-dev \
 		libxpm-dev \
 		libavif-dev \
+		pcre-dev \
 	; \
 	docker-php-ext-configure gd \
 		--with-jpeg --with-freetype --with-webp --with-xpm --with-avif; \
@@ -90,6 +91,6 @@ RUN set -eux; \
 		pdo_mysql \
 		zip \
 	; \
-	pecl install imagick memcached; \
-	docker-php-ext-enable imagick memcached; \
+	pecl install imagick memcached redis ; \
+	docker-php-ext-enable imagick memcached redis; \
 	apk del .build-deps
