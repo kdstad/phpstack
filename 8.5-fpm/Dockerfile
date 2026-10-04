@@ -17,12 +17,12 @@ RUN set -eux; \
 		-e 's!^(user)\s*=\s*www-data\s*$!\1 = appuser!g' \
 		-e 's!^(group)\s*=\s*www-data\s*$!\1 = appuser!g' \
 		-e 's!^(pm)\s*=\s*dynamic\s*$!\1 = ondemand!g' \
-		-e 's!^(pm\.max_children)\s*=.*$!\1 = 80!g' \
+		-e 's!^(pm\.max_children)\s*=.*$!\1 = 10!g' \
 		-e '/^access\.log\s*=/d' \
 		-e '/^pm\.start_servers\s*=/d' \
 		-e '/^pm\.min_spare_servers\s*=/d' \
 		-e '/^pm\.max_spare_servers\s*=/d' \
-		-e '/^\[www\]/a pm.process_idle_timeout = 10s\npm.max_requests = 200\nrequest_terminate_timeout = 600' \
+		-e '/^\[www\]/a pm.process_idle_timeout = 10s\npm.max_requests = 200\nrequest_terminate_timeout = 120\nrequest_slowlog_timeout = 10s\nslowlog = /proc/self/fd/2' \
 		/usr/local/etc/php-fpm.d/www.conf \
 		/usr/local/etc/php-fpm.d/docker.conf \
 	; \
@@ -51,6 +51,18 @@ RUN set -eux; \
 		echo 'log_errors = On'; \
 		echo; \
 		echo 'expose_php = Off'; \
+		echo; \
+		echo 'opcache.enable = 1'; \
+		echo 'opcache.memory_consumption = 256'; \
+		echo 'opcache.interned_strings_buffer = 32'; \
+		echo 'opcache.max_accelerated_files = 20000'; \
+		echo '; set validate_timestamps=0 for more speed, but then reload php-fpm after module/theme changes'; \
+		echo 'opcache.validate_timestamps = 1'; \
+		echo 'opcache.revalidate_freq = 60'; \
+		echo; \
+		echo '; faster file path lookups'; \
+		echo 'realpath_cache_size = 4096K'; \
+		echo 'realpath_cache_ttl = 600'; \
 	} > "$PHP_INI_DIR/conf.d/zz-phpstack.ini"
 
 RUN set -eux; \
