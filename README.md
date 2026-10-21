@@ -13,7 +13,6 @@ While primarily used for PrestaShop, the images are intentionally generic and ca
 This repository contains Dockerfiles and scripts under different licenses:
 
 - **PHP (FPM) images**: MIT License:
-  - [8.1-fpm/LICENSE](8.1-fpm/LICENSE)
   - [8.2-fpm/LICENSE](8.2-fpm/LICENSE)
   - [8.5-fpm/LICENSE](8.5-fpm/LICENSE)
 - **HTTPD image**: Apache License 2.0:
