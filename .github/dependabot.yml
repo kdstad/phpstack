@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: docker
-    directory: /8.1-fpm
+    directory: /8.2-fpm
     schedule:
       interval: weekly
     ignore:
