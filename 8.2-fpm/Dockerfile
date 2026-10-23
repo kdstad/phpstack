@@ -33,6 +33,8 @@ RUN set -eux; \
 		echo "session.cookie_secure=1"; \
 		echo "session.cookie_samesite=Lax"; \
 		echo; \
+		echo "session.upload_progress.enabled=0"; \
+		echo; \
 		echo "date.timezone=${TZ}"; \
 		echo; \
 		echo 'max_execution_time = 300'; \
