@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-FROM docker.io/library/php:8.2-fpm-alpine3.24@sha256:79c64e38c4e8b7242dee6dfb531092e7ddb4913207849bae1374422163cc4032
+FROM docker.io/library/php:8.2-fpm-alpine3.24@sha256:f7d0ea0acdaa28bef474b3741ef0ee00423f05078e216d31f1aa5c4a681ae6d4
 
 ENV TZ=Europe/Copenhagen
 
