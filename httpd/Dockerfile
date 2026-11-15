@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-FROM docker.io/library/httpd:2.4-alpine@sha256:5ddc13143f251758eb7277bdb5ec5afee3a67c5a226861ec4f12b6bcf5e62b8f
+FROM docker.io/library/httpd:2.4-trixie@sha256:32e9403360ab2f1047523e72f256527fb9aee68b342abf6ad03f0d629157f3d9
 
 ENV PHP_FPM_HOST=php
 ENV PHP_FPM_PORT=9000
@@ -7,16 +7,19 @@ ENV PHP_FPM_PORT=9000
 ENV TZ=Europe/Copenhagen
 
 # upgrade the image and create a system user (appuser) for the httpd process
-RUN set -x && \
-	apk upgrade --no-cache && apk add --no-cache tzdata && \
-	cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
-		echo "${TZ}" > /etc/timezone && \
-	addgroup -g 1082 -S appuser && adduser -u 1082 -h /var/www -H -D -S -G appuser appuser
+RUN set -eux; \
+	apt-get update; \
+	DEBIAN_FRONTEND=noninteractive apt-get upgrade -y; \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata; \
+	rm -rf /var/lib/apt/lists/*; \
+	ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime; \
+		echo "${TZ}" > /etc/timezone; \
+	useradd --uid 1082 --user-group --no-create-home --home-dir /var/www --shell /usr/sbin/nologin appuser
 
 COPY conf.d/zz-phpstack.conf "$HTTPD_PREFIX/conf/extra/zz-phpstack.conf"
 COPY conf.d/zz-securityheaders.conf "$HTTPD_PREFIX/conf/extra/zz-securityheaders.conf"
 
-# Ref. https://github.com/docker-library/httpd/blob/master/2.4/alpine/Dockerfile
+# Ref. https://github.com/docker-library/httpd/blob/master/2.4/Dockerfile
 RUN set -eux; \
 	touch "$HTTPD_PREFIX/conf/extra/redirects.conf"; \
 	sed -ri \

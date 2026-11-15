@@ -1,17 +1,20 @@
 # syntax=docker/dockerfile:1.2
-FROM docker.io/library/php:8.2-fpm-alpine@sha256:d17bc39b8ef90e12d598f19cb466f1906c3c214f4bce661dfee49404b42fea09
+FROM docker.io/library/php:8.2-fpm-trixie@sha256:8438f8ea8465dda86393dd84f91da5a02cd5555e494a1000a98112c830669299
 
 ENV TZ=Europe/Copenhagen
 
 # upgrade the image and create a system user (appuser) for the php-fpm process
-RUN set -x && \
-	apk upgrade --no-cache && apk add --no-cache tzdata && \
-	cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
-		echo "${TZ}" > /etc/timezone && \
-	addgroup -g 1082 -S appuser && adduser -u 1082 -h /var/www -H -D -S -G appuser appuser
+RUN set -eux; \
+	apt-get update; \
+	DEBIAN_FRONTEND=noninteractive apt-get upgrade -y; \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata; \
+	rm -rf /var/lib/apt/lists/*; \
+	ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime; \
+		echo "${TZ}" > /etc/timezone; \
+	useradd --uid 1082 --user-group --no-create-home --home-dir /var/www --shell /usr/sbin/nologin appuser
 
 # configure php-fpm pool
-# Ref. https://github.com/docker-library/php/blob/master/8.1/alpine3.22/fpm/Dockerfile
+# Ref. https://github.com/docker-library/php/blob/master/8.2/trixie/fpm/Dockerfile
 RUN set -eux; \
 	sed -ri \
 		-e 's!^(user)\s*=\s*www-data\s*$!\1 = appuser!g' \
@@ -27,7 +30,7 @@ RUN set -eux; \
 		/usr/local/etc/php-fpm.d/docker.conf \
 	; \
 	grep 'user = appuser' /usr/local/etc/php-fpm.d/www.conf; \
-	grep 'pm = ondemand' /usr/local/etc/php-fpm.d/www.conf && \
+	grep 'pm = ondemand' /usr/local/etc/php-fpm.d/www.conf; \
 	{ \
 		echo "session.cookie_httponly=1"; \
 		echo "session.cookie_secure=1"; \
@@ -68,32 +71,20 @@ RUN set -eux; \
 	} > "$PHP_INI_DIR/conf.d/zz-phpstack.ini"
 
 RUN set -eux; \
-	apk add --no-cache \
-		freetype \
-		icu-libs \
-		imagemagick \
-		libjpeg-turbo \
-		libmemcached \
-		libpng \
-		libzip \
-		libwebp \
-		libxpm \
-		libavif \
-	; \
-	apk add --no-cache --virtual .build-deps \
-		$PHPIZE_DEPS \
-		freetype-dev \
-		icu-dev \
-		imagemagick-dev \
-		libjpeg-turbo-dev \
+	savedAptMark="$(apt-mark showmanual)"; \
+	apt-get update; \
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+		libavif-dev \
+		libfreetype-dev \
+		libicu-dev \
+		libjpeg62-turbo-dev \
+		libmagickwand-dev \
 		libmemcached-dev \
 		libpng-dev \
-		libzip-dev \
-		zlib-dev \
 		libwebp-dev \
 		libxpm-dev \
-		libavif-dev \
-		pcre-dev \
+		libzip-dev \
+		zlib1g-dev \
 	; \
 	docker-php-ext-configure gd \
 		--with-jpeg --with-freetype --with-webp --with-xpm --with-avif; \
@@ -106,6 +97,27 @@ RUN set -eux; \
 		pdo_mysql \
 		zip \
 	; \
-	pecl install imagick memcached redis ; \
+	pecl install imagick memcached redis; \
 	docker-php-ext-enable imagick memcached redis; \
-	apk del .build-deps
+	rm -rf /tmp/pear ~/.pearrc; \
+	\
+# remove build dependencies but keep the runtime libraries the extensions link against
+	apt-mark auto '.*' > /dev/null; \
+	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
+	find /usr/local -type f \( -executable -o -name '*.so' \) -exec ldd '{}' ';' \
+		| awk '/=>/ { so = $(NF-1); if (index(so, "/usr/local/") == 1) { next }; gsub("^/(usr/)?", "", so); printf "*%s\n", so }' \
+		| sort -u \
+		| xargs -r dpkg-query --search \
+# ignore dpkg diversion lines and keep only package names
+		| awk 'sub(":$", "", $1) { print $1 }' \
+		| sort -u \
+		| xargs -r apt-mark manual \
+	; \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+	rm -rf /var/lib/apt/lists/*; \
+	\
+# smoke test
+	php --version; \
+	php -m | grep -qi '^imagick$'; \
+	php -m | grep -qi '^memcached$'; \
+	php -m | grep -qi '^redis$'
