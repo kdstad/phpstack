@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: build-and-cleanup
+  cancel-in-progress: false
+
 jobs:
   build:
     name: ${{ matrix.context }}
@@ -52,6 +56,10 @@ jobs:
           context: ${{ matrix.context }}
           push: true
           tags: ${{ matrix.tag }}
+          platforms: linux/amd64
+          # Attestations push untagged child manifests that the cleanup job would delete
+          provenance: false
+          sbom: false
 
       - name: Scan image with Trivy
         if: github.event_name == 'workflow_dispatch' || steps.changes.outputs.changed == 'true'
